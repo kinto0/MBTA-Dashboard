@@ -33,7 +33,6 @@
     </v-autocomplete>
 
     <NextTrain :inbound="true" :station="station" />
-    <NextTrain :inbound="false" :station="station" />
   </div>
 </template>
 
