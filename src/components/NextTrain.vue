@@ -4,9 +4,10 @@
     <h2>Inbound: {{inbound}}</h2>
 
     <p>
-      Next train arriving in {{(nextTrain.arrival - rightNow) / 1000}}.
-      The one after that arrives in {{(secondTrain.arrival - rightNow) / 1000}}.
+      Next train arriving in {{nextArrival}}.
+      The one after that arrives in {{secondArrival}}.
     </p>
+    <button v-on:click="updateTrains()">Update</button>
   </div>
 </template>
 
@@ -21,7 +22,9 @@ export default {
   },
   data() {
     return {
-      trains: []
+      trains: [],
+      nextArrival: "",
+      secondArrival: ""
     };
   },
   computed: {
@@ -45,21 +48,31 @@ export default {
   },
   methods: {
     updateTrains() {
-      var time = new Date();
       Api.getNextTrains(this.station).then(res => {
         if (res != undefined && res.length > 0) {
+          this.trains = [];
           res.forEach(train => {
             this.trains.push({
               arrival: new Date(train.attributes.arrival_time).getTime(),
               departure: new Date(train.attributes.departure_time).getTime()
             });
           });
+          this.countdown();
         }
       });
+    },
+    countdown() {
+      let rightNow = new Date().getTime();
+      let date = new Date(null);
+      date.setSeconds((this.nextTrain.arrival - rightNow) / 1000);
+      this.nextArrival = date.toISOString().substr(14, 5);
+      date.setSeconds((this.secondTrain.arrival - rightNow) / 1000);
+      this.secondArrival = date.toISOString().substr(14, 5);
     }
   },
   mounted() {
     this.updateTrains();
+    this.interval = setInterval(this.countdown, 1000);
   }
 };
 </script>
